@@ -18,7 +18,7 @@
 Как потрогать проект:
 
 1) Клонировать проект.
-2) Далее, либо запускать ./output/bot_async/bot_async
+2) Далее, либо запускать исполняемый файл ./executables/(linux или windows)/bot_async(.exe)
 3) Либо запускать исходники, для этого:
 4) Нужен [python3.10](https://www.python.org/downloads/) с возможность запускать pip.
 5) В папке с проектом pip install -r requirments.txt
