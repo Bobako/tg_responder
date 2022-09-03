@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'index_styles.css')}}">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="{{url_for('static',filename = 'multi_actions.js')}}"></script>
+    <title>Index</title>
+</head>
+<body>
+<div class="multiple_actions">
+    <button class="action">Вкл/выкл выбранное</button>
+    <button class="action">Удалить выбранное</button>
+</div>
+<main>
+    {%for i in range(groups|length)%}
+    <div class="group">
+        {%for account in groups[i]%}
+        <div class="account" id="account{{account.id}}" onclick="console.log('bya');">
+            <a href="{{url_for('chains')}}?account_id={{account.id}}" class="account_repr">{{account.user_repr}}</a>
+            <div class="account_manage">
+                <button class="indicator" title="{{account.status}}"></button>
+                <input type="checkbox" onclick="multi_actions()">
+            </div>
+        </div>
+        {%endfor%}
+        <a class="account add_account" href="{{url_for('add_account')}}?group_number={{i}}">Добавить аккаунт</a>
+    </div>
+    {%endfor%}
+</main>
+</body>
+</html>

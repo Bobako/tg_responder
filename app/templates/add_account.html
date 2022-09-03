@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'add_account_styles.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'arrow.css')}}">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="{{url_for('static',filename = 'new_account.js')}}"></script>
+    <title>Добавить аккаунт</title>
+</head>
+<body>
+<div class="multiple_actions ">
+    <a class="gg-arrow-left" href="{{url_for('index')}}"></a>
+</div>
+
+<main>
+    <label for="phone">Телефон</label>
+    <input class="field" type="text" id="phone" placeholder="89123456789">
+    <button class="field" onclick="request_code()">Получить код</button>
+    <label for="code">Код</label>
+    <input class="field" type="password" id="code">
+    <label for="password">Пароль</label>
+    <input class="field" type="password" id="password">
+    <button class="field" onclick="auth()">Добавить аккаунт</button>
+    <label id="status"></label>
+    <button class="field add_all">Добавить все аккаунты из директории ./sessions</button>
+</main>
+</body>
+</html>

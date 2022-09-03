@@ -1,0 +1,119 @@
+body {
+    padding: 0;
+    margin: 0;
+    background-color: #ebecf0;
+}
+
+main {
+    padding: 10px;
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    box-sizing: border-box;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+}
+
+.group {
+    width: 22%;
+    height: 1000px;
+}
+
+.account {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+    background-color: #FFFFFF;
+    margin: 5px;
+    border-radius: 5px;
+    box-shadow: 1px 1px 0 grey;
+    font-size: 20px;
+}
+
+.indicator {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 7.5px;
+    margin: 5px;
+    background-color: grey;
+
+}
+
+
+input[type=checkbox] {
+    float: right;
+    margin: 5px;
+    width: 15px;
+    height: 15px;
+    border-radius: 7.5px;
+    cursor: pointer;
+}
+
+.account_repr {
+    margin-left: 5px;
+    text-decoration: none;
+    color:black;
+}
+
+a:visited{
+    color:black;
+}
+
+.account_manage {
+    float: right;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.multiple_actions {
+    padding: 5px;
+    width: 100%;
+    height: 40px;
+    background-color: #FFFFFF;
+    box-shadow: 2px 2px 0 #bfbfbf;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    box-sizing: border-box;
+    position: relative;
+    bottom: 40px;
+    transition: 0.2s;
+}
+
+.multiple_actions_extended{
+    bottom: 0;
+}
+
+
+.action {
+    background-color: #FFFFFF;
+    padding:5px;
+    margin: 5px;
+    font-size: 18px;
+    transition: 0.2s;
+    border-radius: 4px;
+}
+
+.action:hover{
+    background-color: #bfbfbf;
+}
+
+.add_account{
+    justify-content: center;
+    color: grey;
+    opacity: 0.8;
+    transition: 0.1s;
+    text-decoration: none;
+}
+
+.add_account:hover{
+    color: black;
+    opacity: 1;
+}
