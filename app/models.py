@@ -21,10 +21,11 @@ class Account(db.Model):
 
     chains = db.relationship("Chain", back_populates="account", cascade="all, delete")
 
-    status: str
+    status = db.Column(db.Integer)  # 0 - не активен, 1 - активен, -1 - ошибка
 
     def __init__(self, **kwargs):
         self.update(**kwargs)
+        self.status = 0
 
     def update(self, **kwargs):
         for key, value in kwargs.items():

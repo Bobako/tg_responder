@@ -2,24 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'base.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'index_styles.css')}}">
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="{{url_for('static',filename = 'multi_actions.js')}}"></script>
+    <script src="{{url_for('static',filename = 'add_group.js')}}"></script>
+    <script src="{{url_for('static',filename = 'check_status.js')}}"></script>
+    <script src="{{url_for('static',filename = 'index.js')}}"></script>
+    <script src="{{url_for('static',filename = 'drndr.js')}}"></script>
     <title>Index</title>
 </head>
 <body>
-<div class="multiple_actions">
-    <button class="action">Вкл/выкл выбранное</button>
-    <button class="action">Удалить выбранное</button>
-</div>
+<header class="end">
+    <h3 class="main_h">Teleresponder 2.0</h3>
+
+    <div class="multiple_actions ">
+        <button class="action" onclick="multi_actions_activated('toggle')">Вкл/выкл выбранное</button>
+        <button class="action" onclick="multi_actions_activated('delete')">Удалить выбранное</button>
+    </div>
+    <button class="no-decoration"><a href="{{url_for('templates')}}" class="action">Шаблоны</a></button>
+    {% if add_button %}
+    <button class="add-group action" onclick="add_group()">Новая группа</button>
+    {% else %}
+    <button class="add-group action blocked" onclick="add_group()">Новая группа</button>
+    {%endif%}
+</header>
 <main>
     {%for i in range(groups|length)%}
-    <div class="group">
+    <div class="group" id="group{{i}}">
         {%for account in groups[i]%}
-        <div class="account" id="account{{account.id}}" onclick="console.log('bya');">
+        <div class="account" id="account{{account.id}}" onmousedown="drag(event, this)" number="{{account.number}}">
             <a href="{{url_for('chains')}}?account_id={{account.id}}" class="account_repr">{{account.user_repr}}</a>
             <div class="account_manage">
-                <button class="indicator" title="{{account.status}}"></button>
+                <button class="indicator" title="{{account.status}}" onclick="toggleAccount({{account.id}})"></button>
                 <input type="checkbox" onclick="multi_actions()">
             </div>
         </div>
@@ -27,6 +42,7 @@
         <a class="account add_account" href="{{url_for('add_account')}}?group_number={{i}}">Добавить аккаунт</a>
     </div>
     {%endfor%}
+
 </main>
 </body>
 </html>

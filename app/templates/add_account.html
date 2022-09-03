@@ -2,16 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'base.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'add_account_styles.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'arrow.css')}}">
+
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="{{url_for('static',filename = 'new_account.js')}}"></script>
     <title>Добавить аккаунт</title>
 </head>
 <body>
-<div class="multiple_actions ">
+<header>
     <a class="gg-arrow-left" href="{{url_for('index')}}"></a>
-</div>
+    <h3>Добавить аккаунт</h3>
+</header>
 
 <main>
     <label for="phone">Телефон</label>

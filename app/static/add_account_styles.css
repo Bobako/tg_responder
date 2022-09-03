@@ -1,14 +1,3 @@
-html {
-    height: 100%;
-}
-
-body {
-    padding: 0;
-    margin: 0;
-    background-color: #ebecf0;
-    height: 100%;
-}
-
 main {
     width: 500px;
     height: 100%;
@@ -17,30 +6,6 @@ main {
     flex-direction: column;
     justify-content: center;
     align-content: center;
-
-}
-
-
-.field {
-    background-color: #FFFFFF;
-    padding: 5px;
-    margin: 5px;
-    font-size: 18px;
-    transition: 0.2s;
-    border-radius: 4px;
-    text-align: center;
-    box-shadow: 1px 1px 0 grey;
-    border: none;
-}
-
-.field:hover {
-    background-color: #bfbfbf;
-}
-
-button {
-    cursor: pointer;
-    border: none;
-
 }
 
 label {
@@ -52,22 +17,4 @@ label {
 
 .add_all {
     margin-top: 100px;
-}
-
-
-a:visited {
-    color: black;
-}
-
-.multiple_actions {
-    position: fixed;
-    padding: 5px;
-    width: 100%;
-    height: 40px;
-    background-color: #FFFFFF;
-    box-shadow: 2px 2px 0 #bfbfbf;
-    display: flex;
-    align-items: center;
-    justify-content: left;
-    box-sizing: border-box;
 }
