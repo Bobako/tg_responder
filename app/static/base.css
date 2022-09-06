@@ -2,6 +2,10 @@ html {
     height: 100%;
 }
 
+*{
+box-sizing:border-box;
+}
+
 body {
     padding: 0;
     margin: 0;
@@ -32,6 +36,7 @@ button {
 }
 
 a{
+    user-drag:none;
     text-decoration: none;
     color:black;
 }
@@ -120,7 +125,7 @@ header{
     box-shadow: 0 0 5px 5px grey;
     font-size: 20px;
 }
-.popup > .buttons{
+.buttons{
     margin:10px;
     display: flex;
     justify-content:space-between;
@@ -132,4 +137,34 @@ header{
 }
 .popup  button{
     width:100px;
+    display:block;
+}
+
+.share_form{
+width:100%;
+display:flex;
+flex-direction: column;
+margin:0;
+}
+
+label.account{
+    margin-top:5px;
+    display:block;
+    display: flex;
+    justify-content:start;
+}
+
+.share_popup{
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 40%;
+    background-color: #CDCDD2;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px 5px grey;
+    font-size: 20px;
+    padding: 10px;
+    margin-bottom:100px;
 }

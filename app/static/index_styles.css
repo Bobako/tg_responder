@@ -70,7 +70,6 @@ left: 20px;
 
 .add_account{
     justify-content: center;
-    color: grey;
     opacity: 0.8;
     transition: 0.1s;
     text-decoration: none;
@@ -82,3 +81,8 @@ left: 20px;
     opacity: 1;
 }
 
+.gg-controller{
+    margin:10px;
+    margin-right:15px;
+    cursor:pointer;
+}

@@ -5,10 +5,10 @@
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'base.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'add_account_styles.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'arrow.css')}}">
-
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="{{url_for('static',filename = 'new_account.js')}}"></script>
-    <title>Добавить аккаунт</title>
+    <script src="{{url_for('static',filename = 'add_all.js')}}"></script>
+    <title>Teleresponder 2.0</title>
 </head>
 <body>
 <header>
@@ -26,7 +26,7 @@
     <input class="field" type="password" id="password">
     <button class="field" onclick="auth()">Добавить аккаунт</button>
     <label id="status"></label>
-    <button class="field add_all">Добавить все аккаунты из директории ./sessions</button>
+    <button class="field add_all" onclick="add_all()">Добавить все аккаунты из директории ./sessions</button>
 </main>
 </body>
 </html>

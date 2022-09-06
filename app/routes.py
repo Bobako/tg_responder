@@ -1,11 +1,13 @@
 import asyncio
+import copy
 
 from flask import render_template, request
 
 from app import flask_app
 from app import db
-from app.models import Account
-from app.bot import request_code, auth
+from app.models import Account, Chain, Message
+from app.bot import request_code, auth, add_sessions
+from app import forms_handler, database_shortcuts
 
 
 @flask_app.route("/")
@@ -16,7 +18,7 @@ def index():
                 Account.group_number == i).order_by(Account.number.asc()).all():
             groups.append(group)
     if not groups:
-        groups = [[], []]
+        groups = [[]]
     return render_template("index_page.html", groups=groups, add_button=len(groups) != 4)
 
 
@@ -25,14 +27,47 @@ def add_account():
     return render_template("add_account.html")
 
 
-@flask_app.route("/chains")
+@flask_app.route("/chains", methods=["GET", "POST"])
 def chains():
-    return "a"
+    account_id = request.args.get("account_id", 0)
+    templates = int(account_id) == 0
+    page_name = ("Цепочки сообщений", "Шаблоны")[templates]
+    chain_id = 0
+    if request.method == "POST":
+        form = forms_handler.parse_forms(request.form, ["chain:for_group", "chain:self_ignore", "chain:in_ignore",
+                                                        "chain:turned_on"])
+        if "share_chains" in form:
+            chain_ids = form.pop("share_chains")["cids"]
+            print(form)
+            if chain_ids:
+                chain_ids = map(int, chain_ids.split("-"))
+                database_shortcuts.share_chains(db.session, chain_ids, list(form.keys()))
+        else:
+            chain_dict = form.pop("chain")
+            chain_id = chain_dict.pop("id")
+            chain_obj = db.session.query(Chain).filter(Chain.id == chain_id).one()
+            chain_obj.update(**chain_dict)
+            for i, message in enumerate(form.values()):
+                message["chain_id"] = chain_id
+                message["number"] = i
+            forms_handler.update_objs(db.session, form, Message)
+            db.session.commit()
+    chains_ = db.session.query(Chain).filter(Chain.account_id == account_id).all()
+    return render_template("chains.html",
+                           chain_id=chain_id,
+                           page_name=page_name,
+                           chains=chains_,
+                           account_id=account_id)
 
 
-@flask_app.route("/templates")
-def templates():
-    return "a"
+@flask_app.route("/api/get_chain")
+def api_get_chain():
+    id_ = request.args.get("id")
+    chain = db.session.query(Chain).filter(Chain.id == id_).one()
+    messages = db.session.query(Message).filter(Message.chain_id == id_).order_by(Message.number.asc()).all()
+    return render_template("chain.html",
+                           chain=chain,
+                           messages=messages)
 
 
 @flask_app.route("/api/request_code")
@@ -61,7 +96,7 @@ def api_auth():
         if not db.session.query(Account).filter(Account.phone == phone).first():
             number = len(db.session.query(Account).filter(Account.group_number == group_number).all())
             db.session.add(Account(phone=phone, user_repr=user_repr, turned_on=True,
-                                   group_number=group_number, number=number))
+                                   group_number=group_number, number=number, status=0))
             db.session.commit()
         return "Аккаунт добавлен"
 
@@ -77,12 +112,16 @@ def api_check_status():
 
 @flask_app.route("/api/toggle")
 def api_toggle():
-    ids = request.args.get("id", None)
+    ids = request.args.get("aid", None)
     class_ = request.args.get("class")
     if not ids and class_:
-        return
+        return ""
     ids = list(map(int, ids.split("-")))
-    # TODO
+    class_ = globals()[class_]
+    for id_ in ids:
+        obj = db.session.query(class_).filter(class_.id == id_).one()
+        obj.turned_on = not obj.turned_on
+    db.session.commit()
     return ""
 
 
@@ -91,34 +130,68 @@ def api_delete():
     ids = request.args.get("id", )
     class_ = request.args.get("class")
     if not ids and class_:
-        return
+        return ""
+    print(ids)
     ids = list(map(int, ids.split("-")))
-
-    classes = {"Account"}
-
+    class_ = globals()[class_.capitalize()]
+    for id_ in ids:
+        obj = db.session.query(class_).filter(class_.id == id_).one()
+        db.session.delete(obj)
+    db.session.commit()
     return ""
 
 
 @flask_app.route("/api/move_account")
 def api_move_account():
-    number = request.args.get("number")
-    group = request.args.get("group")
-    id_ = request.args.get("id")
+    number = int(request.args.get("number"))
+    group = int(request.args.get("group"))
+    id_ = int(request.args.get("id"))
     account = db.session.query(Account).filter(Account.id == id_).one()
     old_number = account.number
-    old_group = account.group
+    old_group = account.group_number
     account.group_number = group
     account.number = number
-
     # fixing shifted accounts numbers
-    accounts = db.session(Account).filter(Account.group_number == old_group).filter(Account.number >= old_number).all()
-    for account in accounts:
+    for account in db.session.query(Account).filter(Account.group_number == old_group).filter(
+            Account.number > old_number).filter(Account.id != id_).all():
         account.number -= 1
-
-    accounts = db.session(Account).filter(Account.group_number == group).filter(Account.number > number).all()
-    for account in accounts:
+    for account in db.session.query(Account).filter(Account.group_number == group).filter(
+            Account.number >= number).filter(Account.id != id_).all():
         account.number += 1
-
 
     db.session.commit()
     return ""
+
+
+@flask_app.route("/api/new_chain")
+def api_new_chain():
+    account_id = request.args.get("account_id")
+    if account_id == 0:
+        account_id = None
+    chain = Chain(name="", keywords="", turned_on=True, pause_seconds=0, for_group=False, self_ignore=True,
+                  in_ignore=False,
+                  account_id=account_id)
+    db.session.add(chain)
+    db.session.flush()
+    db.session.refresh(chain)
+    id_ = chain.id
+    db.session.commit()
+    return str(id_)
+
+
+@flask_app.route("/api/get_accounts_to_share")
+def api_get_accounts():
+    aid = request.args.get("account_id", None)
+    cids = request.args.get("cids", "")
+    query = db.session.query(Account)
+    if aid:
+        query = query.filter(Account.id != aid)
+    accounts = query.all()
+    return render_template("sharePopUp.html", accounts=accounts, cids=cids)
+
+
+@flask_app.route("/api/add_sessions")
+def api_add_session_files():
+    group_number = request.args.get("group_number")
+    response = asyncio.run(add_sessions(db.session, group_number))
+    return response

@@ -8,19 +8,21 @@
     <script src="{{url_for('static',filename = 'multi_actions.js')}}"></script>
     <script src="{{url_for('static',filename = 'add_group.js')}}"></script>
     <script src="{{url_for('static',filename = 'check_status.js')}}"></script>
-    <script src="{{url_for('static',filename = 'index.js')}}"></script>
     <script src="{{url_for('static',filename = 'drndr.js')}}"></script>
-    <title>Index</title>
+    <script src="{{url_for('static',filename = 'select_all.js')}}"></script>
+    <link href='https://css.gg/controller.css' rel='stylesheet'>
+    <title>Teleresponder 2.0</title>
 </head>
 <body>
 <header class="end">
     <h3 class="main_h">Teleresponder 2.0</h3>
 
     <div class="multiple_actions ">
-        <button class="action" onclick="multi_actions_activated('toggle')">Вкл/выкл выбранное</button>
-        <button class="action" onclick="multi_actions_activated('delete')">Удалить выбранное</button>
+        <button class="action" onclick="select_all()">Выбрать все</button>
+        <button class="action" onclick="multi_actions_activated('toggle', 'account')">Вкл/выкл</button>
+        <button class="action" onclick="multi_actions_activated('delete', 'account')">Удалить</button>
     </div>
-    <button class="no-decoration"><a href="{{url_for('templates')}}" class="action">Шаблоны</a></button>
+    <button class="no-decoration"><a href="{{url_for('chains')}}?account_id=0" class="action">Шаблоны</a></button>
     {% if add_button %}
     <button class="add-group action" onclick="add_group()">Новая группа</button>
     {% else %}
@@ -31,11 +33,13 @@
     {%for i in range(groups|length)%}
     <div class="group" id="group{{i}}">
         {%for account in groups[i]%}
-        <div class="account" id="account{{account.id}}" onmousedown="drag(event, this)" number="{{account.number}}">
-            <a href="{{url_for('chains')}}?account_id={{account.id}}" class="account_repr">{{account.user_repr}}</a>
+        <div class="account" id="account{{account.id}}" number="{{account.number}}">
+            <a href="{{url_for('chains')}}?account_id={{account.id}}" ondrag="return false" ondragstart="return false"
+               class="account_repr">{{account.user_repr}}</a>
             <div class="account_manage">
-                <button class="indicator" title="{{account.status}}" onclick="toggleAccount({{account.id}})"></button>
-                <input type="checkbox" onclick="multi_actions()">
+                <button class="indicator" title="{{account.status}}" onclick="toggle({{account.id}}, 'account')"></button>
+                <input type="checkbox" class="ma select_all" id ="cb{{account.id}}" onclick="multi_actions()">
+                <div class="gg-controller" onmousedown="drag(event, this)"></div>
             </div>
         </div>
         {%endfor%}

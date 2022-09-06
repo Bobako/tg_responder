@@ -1,0 +1,84 @@
+<form method="post">
+    <div class="main_form">
+        <div class="left">
+            <div>
+                <input hidden name="chain:id" value="{{chain.id}}">
+                <label for="name">Название цепочки</label><br>
+                <input type="text" name="chain:name" id="name" placeholder="Название цепочки" value="{{chain.name}}">
+            </div>
+            <div>
+                <label for="keywords">Активирующие фразы</label><br>
+                <input type="text" name="chain:keywords" id="keywords" placeholder="привет//здравствуй"
+                       value="{{chain.keywords}}"></div>
+            <div>
+                <label for="pause_time">Время паузы для цепочки (с)</label><br>
+                <input type="number" name="chain:pause_time" id="pause_time" placeholder="0"
+                       value="{{chain.pause_seconds}}">
+            </div>
+
+        </div>
+        <div class="right">
+            <div>
+                <input type="checkbox" id="for_group" name="chain:for_group" {%if chain.for_group%} checked {%endif%}>
+                <label for="for_group">Для групп</label>
+
+            </div>
+            <div>
+                <input type="checkbox" id="self_ignore" name="chain:self_ignore" {%if chain.self_ignore%} checked
+                       {%endif%}>
+                <label for="self_ignore">Игнорировать исходящие</label>
+
+            </div>
+            <div>
+                <input type="checkbox" id="in_ignore" name="chain:in_ignore" {%if chain.in_ignore%} checked {%endif%}>
+                <label for="in_ignore">Игнорировать входящие во время работы цепочки</label>
+
+            </div>
+
+            <div>
+                <input type="checkbox" id="turned_on" name="chain:turned_on" {%if chain.turned_on%} checked {%endif%}>
+                <label for="turned_on">Цепочка активна</label>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="messages" id="messages">
+        {%for message in messages%}
+        <div class="message">
+            <div>
+                <input type="text" id="{{message.id}}:text" name="{{message.id}}:text" placeholder="Текст" title="Текст сообщения"
+                       value="{{message.text}}">
+                <input type="text" id="{{message.id}}:content_path" name="{{message.id}}:content_path" title="Путь к содержимому"
+                       placeholder="Путь к содержимому" value="{{message.content_path}}">
+                <input type="number" id="{{message.id}}:delay_seconds" name="{{message.id}}:delay_seconds" title="Задержка перед отправкой"
+                       placeholder="Задержка перед отправкой" value="{{message.delay_seconds}}">
+                <select name="{{message.id}}:type">
+                    <option value="0" {%if message.type== 0%} selected {%endif%}>Текст</option>
+                    <option value="1" {%if message.type== 1%} selected {%endif%}>Фото</option>
+                    <option value="2" {%if message.type== 2%} selected {%endif%}>Голосовое сообщение</option>
+                    <option value="3" {%if message.type== 3%} selected {%endif%}>Видео-сообщение</option>
+                    <option value="4" {%if message.type== 4%} selected {%endif%}>Документ</option>
+                    <option value="5" {%if message.type== 5%} selected {%endif%}>Видео</option>
+                    <option value="6" {%if message.type== 6%} selected {%endif%}>Звуковой файл</option>
+                </select>
+            </div>
+            <div class="manage_message">
+                <label class="gg-trash">
+                    <input type="checkbox" name="{{message.id}}:delete" class="delete_cb" onchange="change_color(this)">
+                </label>
+                <div class="gg-controller" onmousedown="drag(event, this)"></div>
+            </div>
+
+        </div>
+        {% endfor%}
+        <button type="button" class="new_message" onclick="new_message(this)">
+            Добавить сообщение
+        </button>
+
+
+    </div>
+    <div class="save">
+        <input type="submit" value="Сохранить" class="action">
+    </div>
+</form>

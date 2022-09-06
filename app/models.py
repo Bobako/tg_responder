@@ -45,6 +45,7 @@ class Chain(db.Model):
     used_at = db.Column(db.DateTime)  # последнее использование
     for_group = db.Column(db.Boolean)  # используется ли в группах
     self_ignore = db.Column(db.Boolean)  # игнорировать ли свои сообщ
+    in_ignore = db.Column(db.Boolean) # игнорировать сообщения в процессе работы цепочки
 
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'))
     # если None, цепочка не прикреплена к пользователю и является шаблоном

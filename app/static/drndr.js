@@ -1,5 +1,10 @@
-function drag(e, ball){
-  let old_group = $(ball).parent().attr('id').slice(5);
+function drag(e, dragger){
+  if (e.button!=0){
+  return
+  }
+  let ball = dragger.parentNode.parentNode;
+  console.log(ball)
+  let old_group = $(ball.parentElement);
   let old_number = $(ball).attr("number");
   ball.style.width = ball.offsetWidth +"px";
   var coords = getCoords(ball);
@@ -58,7 +63,6 @@ function move_account(group, number, account){
     account = $("body>.account");
     if (number != 0){
         let af =  $(group).find(".account")[number-1];
-        console.log(af);
         account.insertAfter(af);
     }
     else{
