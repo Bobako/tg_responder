@@ -5,12 +5,12 @@
 
         {% for account in accounts %}
         <label class="account">
-            <input type="checkbox" name="{{account.id}}:share" class="select_all">
+            <input type="checkbox" name="{{account.id}}:share" class="select_all_share">
             {{account}}
         </label>
         {% endfor %}
         <div class="buttons">
-            <button type="button" class="action" onclick="select_all()">Выбрать все</button>
+            <button type="button" class="action" onclick="select_all('.select_all_share')">Выбрать все</button>
             <button type="submit" class="action">Подтвердить</button>
         </div>
     </form>

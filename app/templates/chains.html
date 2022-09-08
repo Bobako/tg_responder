@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="{{url_for('static',filename = 'jquery.js')}}"></script>
+    <script src="{{url_for('static',filename = 'keep_server_alive.js')}}"></script>
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'base.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'chains.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'arrow.css')}}">

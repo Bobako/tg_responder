@@ -9,7 +9,7 @@ function multi_actions() {
 
 function toggle(aid, class_){
     let req = new XMLHttpRequest();
-    req.open("GET", "api/toggle?aid="+aid+"&class="+class_, true);
+    req.open("GET", "api/toggle?id="+aid+"&class="+class_, true);
     req.send();
 }
 
@@ -72,3 +72,4 @@ function sharePopUp(cids){
         $("body").append(req.response);
     }
 }
+

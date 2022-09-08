@@ -1,11 +1,11 @@
 let all_selected = false;
-function select_all(){
+function select_all(class_name=".select_all"){
     if (all_selected){
-        $(".select_all").prop("checked", false);
+        $(class_name).prop("checked", false);
         all_selected = false;
     }
     else{
-        $(".select_all").prop("checked", true);
+        $(class_name).prop("checked", true);
         all_selected = true;
     }
 }

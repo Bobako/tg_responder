@@ -129,7 +129,7 @@ function new_chain(account_id){
            $("#chains_container").append(
             '<div class="select_chain">'+
                 '<div class="chain_name" onclick="get_chain('+new_chain_id+')">Новая цепочка</div>'+
-                '<div><input type="checkbox" id="cb'+new_chain_id+'" onclick="multi_actions()"></div>'+
+                '<div><input type="checkbox" class="ma" id="cb'+new_chain_id+'" onclick="multi_actions()"></div>'+
             '</div>'
             )
             get_chain(new_chain_id);

@@ -4,15 +4,15 @@
             <div>
                 <input hidden name="chain:id" value="{{chain.id}}">
                 <label for="name">Название цепочки</label><br>
-                <input type="text" name="chain:name" id="name" placeholder="Название цепочки" value="{{chain.name}}">
+                <input autocomplete="off" type="text" name="chain:name" id="name" placeholder="Название цепочки" value="{{chain.name}}">
             </div>
             <div>
                 <label for="keywords">Активирующие фразы</label><br>
-                <input type="text" name="chain:keywords" id="keywords" placeholder="привет//здравствуй"
+                <input autocomplete="off" type="text" name="chain:keywords" id="keywords" placeholder="привет//здравствуй"
                        value="{{chain.keywords}}"></div>
             <div>
                 <label for="pause_time">Время паузы для цепочки (с)</label><br>
-                <input type="number" name="chain:pause_time" id="pause_time" placeholder="0"
+                <input autocomplete="off" type="number" name="chain:pause_seconds" id="pause_time" placeholder="0"
                        value="{{chain.pause_seconds}}">
             </div>
 
@@ -47,11 +47,11 @@
         {%for message in messages%}
         <div class="message">
             <div>
-                <input type="text" id="{{message.id}}:text" name="{{message.id}}:text" placeholder="Текст" title="Текст сообщения"
+                <input autocomplete="off" type="text" id="{{message.id}}:text" name="{{message.id}}:text" placeholder="Текст" title="Текст сообщения"
                        value="{{message.text}}">
-                <input type="text" id="{{message.id}}:content_path" name="{{message.id}}:content_path" title="Путь к содержимому"
+                <input autocomplete="off" type="text" id="{{message.id}}:content_path" name="{{message.id}}:content_path" title="Путь к содержимому"
                        placeholder="Путь к содержимому" value="{{message.content_path}}">
-                <input type="number" id="{{message.id}}:delay_seconds" name="{{message.id}}:delay_seconds" title="Задержка перед отправкой"
+                <input autocomplete="off" type="number" id="{{message.id}}:delay_seconds" name="{{message.id}}:delay_seconds" title="Задержка перед отправкой"
                        placeholder="Задержка перед отправкой" value="{{message.delay_seconds}}">
                 <select name="{{message.id}}:type">
                     <option value="0" {%if message.type== 0%} selected {%endif%}>Текст</option>

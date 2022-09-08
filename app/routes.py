@@ -1,13 +1,17 @@
 import asyncio
 import copy
+from threading import Lock
 
 from flask import render_template, request
 
 from app import flask_app
 from app import db
 from app.models import Account, Chain, Message
-from app.bot import request_code, auth, add_sessions
+from app.bot import request_code, auth, add_sessions, add_worker, kill_worker, stop_worker
 from app import forms_handler, database_shortcuts
+from app import loop
+
+lock = Lock()
 
 
 @flask_app.route("/")
@@ -19,7 +23,8 @@ def index():
             groups.append(group)
     if not groups:
         groups = [[]]
-    return render_template("index_page.html", groups=groups, add_button=len(groups) != 4)
+    return render_template("index_page.html", groups=groups, add_button=len(groups) != 4,
+                           status_titles={-1: "Не удалось подключиться", 0: "Отключен", 1: "Активен"})
 
 
 @flask_app.route("/add_account")
@@ -38,7 +43,7 @@ def chains():
                                                         "chain:turned_on"])
         if "share_chains" in form:
             chain_ids = form.pop("share_chains")["cids"]
-            print(form)
+
             if chain_ids:
                 chain_ids = map(int, chain_ids.split("-"))
                 database_shortcuts.share_chains(db.session, chain_ids, list(form.keys()))
@@ -95,9 +100,12 @@ def api_auth():
     else:
         if not db.session.query(Account).filter(Account.phone == phone).first():
             number = len(db.session.query(Account).filter(Account.group_number == group_number).all())
-            db.session.add(Account(phone=phone, user_repr=user_repr, turned_on=True,
-                                   group_number=group_number, number=number, status=0))
+            account = Account(phone=phone, user_repr=user_repr, turned_on=True,
+                              group_number=group_number, number=number, status=0)
+            db.session.add(account)
             db.session.commit()
+            loop.call_soon_threadsafe(add_worker(account.id, loop))
+
         return "Аккаунт добавлен"
 
 
@@ -112,16 +120,22 @@ def api_check_status():
 
 @flask_app.route("/api/toggle")
 def api_toggle():
-    ids = request.args.get("aid", None)
+    ids = request.args.get("id", None)
     class_ = request.args.get("class")
     if not ids and class_:
         return ""
     ids = list(map(int, ids.split("-")))
-    class_ = globals()[class_]
-    for id_ in ids:
-        obj = db.session.query(class_).filter(class_.id == id_).one()
-        obj.turned_on = not obj.turned_on
-    db.session.commit()
+    class_ = globals()[class_.capitalize()]
+    objs = [db.session.query(class_).filter(class_.id == id_).one() for id_ in ids]
+    state = not sum(map(int, [obj.turned_on for obj in objs]))
+    print(state)
+    with lock:
+        for obj in objs:
+
+            obj.turned_on = state
+            if class_ == Account and not state:
+                asyncio.run_coroutine_threadsafe(stop_worker(obj.id), loop)
+            db.session.commit()
     return ""
 
 
@@ -131,10 +145,11 @@ def api_delete():
     class_ = request.args.get("class")
     if not ids and class_:
         return ""
-    print(ids)
     ids = list(map(int, ids.split("-")))
     class_ = globals()[class_.capitalize()]
     for id_ in ids:
+        if class_ == Account:
+            asyncio.run_coroutine_threadsafe(kill_worker(id_), loop)
         obj = db.session.query(class_).filter(class_.id == id_).one()
         db.session.delete(obj)
     db.session.commit()
@@ -181,11 +196,11 @@ def api_new_chain():
 
 @flask_app.route("/api/get_accounts_to_share")
 def api_get_accounts():
-    aid = request.args.get("account_id", None)
+    account_id = request.args.get("account_id", None)
     cids = request.args.get("cids", "")
     query = db.session.query(Account)
-    if aid:
-        query = query.filter(Account.id != aid)
+    if account_id:
+        query = query.filter(Account.id != account_id)
     accounts = query.all()
     return render_template("sharePopUp.html", accounts=accounts, cids=cids)
 
@@ -193,5 +208,5 @@ def api_get_accounts():
 @flask_app.route("/api/add_sessions")
 def api_add_session_files():
     group_number = request.args.get("group_number")
-    response = asyncio.run(add_sessions(db.session, group_number))
+    response = asyncio.run(add_sessions(group_number, loop))
     return response

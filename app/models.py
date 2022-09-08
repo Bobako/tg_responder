@@ -1,3 +1,5 @@
+import datetime
+
 from app import db
 
 MSG_TYPE_TEXT = 0
@@ -45,7 +47,7 @@ class Chain(db.Model):
     used_at = db.Column(db.DateTime)  # последнее использование
     for_group = db.Column(db.Boolean)  # используется ли в группах
     self_ignore = db.Column(db.Boolean)  # игнорировать ли свои сообщ
-    in_ignore = db.Column(db.Boolean) # игнорировать сообщения в процессе работы цепочки
+    in_ignore = db.Column(db.Boolean)  # игнорировать сообщения в процессе работы цепочки
 
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'))
     # если None, цепочка не прикреплена к пользователю и является шаблоном
@@ -79,3 +81,17 @@ class Message(db.Model):
     def update(self, **kwargs):
         for key, value in kwargs.items():
             self.__setattr__(key, value)
+
+
+class ChainUsage(db.Model):
+    chain_id = db.Column(db.Integer, primary_key=True)
+    chat_id = db.Column(db.Integer)
+    usage_datetime = db.Column(db.DateTime)
+
+    def __init__(self, chain_id, chat_id):
+        self.chat_id = chat_id
+        self.chain_id = chain_id
+        self.update()
+
+    def update(self):
+        self.usage_datetime = datetime.datetime.now()

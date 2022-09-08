@@ -1,3 +1,8 @@
+$(document).ready(function(){
+    document.getElementById('myInput').value = ' ';
+    alert()
+});
+
 function request_code() {
     let phone = $("#phone").val();
     let req = new XMLHttpRequest();
