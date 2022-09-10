@@ -47,11 +47,17 @@ def chains():
             if chain_ids:
                 chain_ids = map(int, chain_ids.split("-"))
                 database_shortcuts.share_chains(db.session, chain_ids, list(form.keys()))
+        elif "delete_derived_chains" in form:
+            chain_ids = form.pop("delete_derived_chains")["cids"]
+            if chain_ids:
+                chain_ids = map(int, chain_ids.split("-"))
+                database_shortcuts.delete_derived(db.session, chain_ids, list(form.keys()))
         else:
             chain_dict = form.pop("chain")
             chain_id = chain_dict.pop("id")
             chain_obj = db.session.query(Chain).filter(Chain.id == chain_id).one()
             chain_obj.update(**chain_dict)
+            print(form)
             for i, message in enumerate(form.values()):
                 message["chain_id"] = chain_id
                 message["number"] = i
@@ -62,7 +68,8 @@ def chains():
                            chain_id=chain_id,
                            page_name=page_name,
                            chains=chains_,
-                           account_id=account_id)
+                           account_id=account_id,
+                           templates=templates)
 
 
 @flask_app.route("/api/get_chain")
@@ -104,7 +111,7 @@ def api_auth():
                               group_number=group_number, number=number, status=0)
             db.session.add(account)
             db.session.commit()
-            loop.call_soon_threadsafe(add_worker(account.id, loop))
+            loop.call_soon_threadsafe(add_worker, account.id, loop)
 
         return "Аккаунт добавлен"
 
@@ -128,7 +135,6 @@ def api_toggle():
     class_ = globals()[class_.capitalize()]
     objs = [db.session.query(class_).filter(class_.id == id_).one() for id_ in ids]
     state = not sum(map(int, [obj.turned_on for obj in objs]))
-    print(state)
     with lock:
         for obj in objs:
 
@@ -151,6 +157,9 @@ def api_delete():
         if class_ == Account:
             asyncio.run_coroutine_threadsafe(kill_worker(id_), loop)
         obj = db.session.query(class_).filter(class_.id == id_).one()
+        if class_ == Chain:
+            if not obj.account_id:
+                [db.session.delete(obj) for obj in db.session.query(Chain).filter(Chain.derived_from == id_).all()]
         db.session.delete(obj)
     db.session.commit()
     return ""
@@ -183,7 +192,7 @@ def api_new_chain():
     account_id = request.args.get("account_id")
     if account_id == 0:
         account_id = None
-    chain = Chain(name="", keywords="", turned_on=True, pause_seconds=0, for_group=False, self_ignore=True,
+    chain = Chain(name="Новая цепочка", keywords="", turned_on=True, pause_seconds=0, for_group=False, self_ignore=True,
                   in_ignore=False,
                   account_id=account_id)
     db.session.add(chain)
@@ -198,11 +207,12 @@ def api_new_chain():
 def api_get_accounts():
     account_id = request.args.get("account_id", None)
     cids = request.args.get("cids", "")
+    action = request.args.get("action", "share")
     query = db.session.query(Account)
     if account_id:
         query = query.filter(Account.id != account_id)
     accounts = query.all()
-    return render_template("sharePopUp.html", accounts=accounts, cids=cids)
+    return render_template("sharePopUp.html", accounts=accounts, cids=cids, action=action)
 
 
 @flask_app.route("/api/add_sessions")

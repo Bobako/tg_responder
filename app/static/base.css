@@ -168,3 +168,7 @@ label.account{
     padding: 10px;
     margin-bottom:100px;
 }
+
+textarea{
+resize:none;
+}

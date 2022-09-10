@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <script src="{{url_for('static',filename = 'jquery.js')}}"></script>
+    <script src="{{url_for('static',filename = 'type_change.js')}}"></script>
     <script src="{{url_for('static',filename = 'keep_server_alive.js')}}"></script>
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'base.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'chains.css')}}">
@@ -12,6 +13,7 @@
     <link href='https://css.gg/controller.css' rel='stylesheet'>
     <script src="{{url_for('static',filename = 'chains.js')}}"></script>
     <script src="{{url_for('static',filename = 'select_all.js')}}"></script>
+
     <meta charset="UTF-8">
     <title>Teleresponder 2.0</title>
 </head>
@@ -26,6 +28,10 @@
         <button class="action" onclick="multi_actions_activated('toggle', 'chain')">Вкл/выкл</button>
         <button class="action" onclick="multi_actions_activated('delete', 'chain')">Удалить </button>
         <button class="action" onclick="multi_actions_activated('share', 'chain')">Расшарить</button>
+        {% if templates %}
+        <button class="action" onclick="multi_actions_activated('delete_derived', 'chain')">Сбросить</button>
+        {% endif %}
+
     </div>
 </header>
 <div class="cont">

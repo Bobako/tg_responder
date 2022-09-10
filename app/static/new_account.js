@@ -1,17 +1,13 @@
-$(document).ready(function(){
-    document.getElementById('myInput').value = ' ';
-    alert()
-});
-
 function request_code() {
     let phone = $("#phone").val();
     let req = new XMLHttpRequest();
     req.open("GET",
         "api/request_code?phone=" + phone,
-        false);
+        true);
     req.send(null);
-    $("#status").empty();
-    $("#status").append(req.responseText);
+    req.onload = function(){$("#status").empty();
+    $("#status").append(req.responseText);}
+
 }
 
 function auth() {
@@ -25,6 +21,7 @@ function auth() {
         "api/auth?phone=" + phone + "&code=" + code + "&password=" + password + "&group_number=" + group_number,
         false);
     req.send(null);
-    $("#status").empty();
-    $("#status").append(req.responseText);
+    req.onload = function(){$("#status").empty();
+    $("#status").append(req.responseText);}
+
 }

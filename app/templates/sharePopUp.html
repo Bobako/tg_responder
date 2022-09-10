@@ -1,7 +1,7 @@
 <div class="share_popup">
     <p> Выберите аккаунты:</p>
     <form class="share_form" method="post">
-        <input hidden name="share_chains:cids" value="{{cids}}">
+        <input hidden name="{{action}}_chains:cids" value="{{cids}}">
 
         {% for account in accounts %}
         <label class="account">

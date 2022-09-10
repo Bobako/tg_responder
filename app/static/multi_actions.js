@@ -31,7 +31,11 @@ function multi_actions_activated(type, class_){
         return;
     }
     if (type == "share"){
-        sharePopUp(aid)
+        sharePopUp(aid, "share")
+    }
+
+    if (type == "delete_derived"){
+        sharePopUp(aid, "delete_derived")
     }
 
 }
@@ -61,12 +65,12 @@ function accept(url=""){
 
 }
 
-function sharePopUp(cids){
+function sharePopUp(cids, action){
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const account_id = urlParams.get('account_id')
     let req = new XMLHttpRequest();
-    req.open("GET", "api/get_accounts_to_share?account_id="+account_id+"&cids="+cids, true);
+    req.open("GET", "api/get_accounts_to_share?account_id="+account_id+"&cids="+cids + "&action="+action, true);
     req.send();
     req.onload = function () {
         $("body").append(req.response);

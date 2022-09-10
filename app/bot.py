@@ -5,6 +5,7 @@ import re
 
 import telethon
 from telethon import TelegramClient
+from telethon import functions, types
 
 from app.config import config
 from app.models import Account, Chain, Message, ChainUsage
@@ -55,12 +56,10 @@ async def add_sessions(group_number, loop):
     for session_file in sessions:
         try:
             phone = session_file.replace(".session", "")
-            print(phone)
             if db.session.query(Account).filter(Account.phone == phone).first():
                 raise Exception("уже добавлен")
 
             tg_session_path = os.path.abspath(config["TELETHON"]["sessions_path"]) + "/" + phone + ".session"
-            print(tg_session_path)
             client = TelegramClient(tg_session_path, config["TELETHON"]["id"],
                                     config["TELETHON"]["hash"])
             await client.connect()
@@ -154,27 +153,31 @@ class Worker:
             chains = db.session.query(Chain).filter(Chain.account_id == self.account.id).filter(
                 Chain.turned_on == True).all()
             default = False
-            for chain in chains:
-                keywords = chain.keywords.replace('*', '').split("//")
-                if keywords == ['']:
-                    keywords = None
-                if not keywords:
-                    default = True
-                    continue
-
-                if is_similar_in_list(message, keywords):
-                    was_actually_send = await self.run_chain(chain, group, event.message, sent_from,
-                                                             user_entity)
-                    if was_actually_send:
-                        return
-
-            if default:
+            try:
                 for chain in chains:
-                    if not chain.keywords:
+                    keywords = chain.keywords.replace('*', '').split("//")
+                    if keywords == ['']:
+                        keywords = None
+                    if not keywords:
+                        default = True
+                        continue
+
+                    if is_similar_in_list(message, keywords):
                         was_actually_send = await self.run_chain(chain, group, event.message, sent_from,
                                                                  user_entity)
                         if was_actually_send:
                             return
+
+                if default:
+                    for chain in chains:
+                        if not chain.keywords:
+                            was_actually_send = await self.run_chain(chain, group, event.message, sent_from,
+                                                                     user_entity)
+                            if was_actually_send:
+                                return
+            except Exception as ex:
+                with open(config["TELETHON"]["logs"], "a") as file:
+                    file.write(f"{datetime.datetime.now()}: {self.client} - {ex} во время работы\n")
 
     async def run(self):
         while self.keep_alive:
@@ -185,7 +188,7 @@ class Worker:
                         await self.client.run_until_disconnected()
                     except Exception as ex:
                         with open(config["TELETHON"]["logs"], "a") as file:
-                            file.write(f"{datetime.datetime.now()}: {ex} во время работы\n")
+                            file.write(f"{datetime.datetime.now()}: {self.client} - {ex} во время работы\n")
 
                 else:
                     status = [-1, 1][(await self.connect())]
@@ -196,6 +199,7 @@ class Worker:
             await asyncio.sleep(1)
 
     async def run_chain(self, chain, group, tg_message, sent_from, user_entity):
+        print(sent_from)
         if group != chain.for_group:
             return
 
@@ -204,7 +208,6 @@ class Worker:
 
         if self.get_chain_status(sent_from)["active"] and chain.in_ignore:
             return
-
 
         if last_usage := db.session.query(ChainUsage).filter(ChainUsage.chain_id == chain.id).filter(
                 ChainUsage.chat_id == sent_from).first():
@@ -227,15 +230,29 @@ class Worker:
 
             self.get_chain_status(sent_from)["responded"] = True
 
-            action = ["typing", "photo", "record-audio", "record-round", "document", "video", "audio"][message.type]
+            action = ["typing", "photo", "record-audio", "record-round", "document", "video", "audio", "location"][
+                message.type]
             async with self.client.action(user_entity, action):
                 await asyncio.sleep(3)
                 if message.type == 0:
-                    await self.client.send_message(user_entity, message.text)
+                    await self.client.send_message(user_entity, message.text.replace("\\n", "\n"))
                 else:
-                    await self.client.send_file(user_entity, message.content_path, caption=message.text,
-                                                voice_note=(message.type == 2),
-                                                video_note=(message.type == 3))
+                    if message.type != 7:
+                        await self.client.send_file(user_entity, message.content_path,
+                                                    caption=message.text.replace("\\n", "\n"),
+                                                    voice_note=(message.type == 2),
+                                                    video_note=(message.type == 3),
+                                                    ttl=message.ttl)
+                    else:
+                        await self.client(functions.messages.SendMediaRequest(
+                            peer=user_entity,
+                            media=types.InputMediaGeoPoint(
+                                types.InputGeoPoint(
+                                    lat=message.latitude if message.latitude else 0,
+                                    long=message.longitude if message.longitude else 0
+                                )),
+                            message=''
+                        ))
 
         self.get_chain_status(sent_from)["active"] = False
         return True
@@ -252,8 +269,8 @@ class Worker:
             db.session.commit()
             return False
         else:
-            with open(config["TELETHON"]["logs"], "a") as file:
-                file.write(f"{datetime.datetime.now()}: инициализирован {self.account}\n")
+            # with open(config["TELETHON"]["logs"], "a") as file:
+            #    file.write(f"{datetime.datetime.now()}: инициализирован {self.account}\n")
             self.account.status = 1
             db.session.commit()
             return True
@@ -311,15 +328,13 @@ def add_worker(account_id, loop):  # while app running -> in routes
 
 
 async def kill_worker(account_id):  # to delete
-    with lock:
-        await WORKERS[account_id].client.disconnect()
-        WORKERS[account_id].keep_alive = False
-        WORKERS.pop(account_id)
+    WORKERS[account_id].keep_alive = False
+    await WORKERS[account_id].client.disconnect()
+    WORKERS.pop(account_id)
 
 
 async def stop_worker(account_id):
-    with lock:
-        await WORKERS[account_id].client.disconnect()
+    await WORKERS[account_id].client.disconnect()
 
 
 def is_similar(s1, s2):

@@ -13,7 +13,8 @@ def share_chains(session, chain_ids, account_ids):
                 for_group=chain.for_group,
                 self_ignore=chain.self_ignore,
                 in_ignore=chain.in_ignore,
-                account_id=account_id
+                account_id=account_id,
+                derived_from=chain_id
             )
             session.add(chain_copy)
             session.flush()
@@ -25,6 +26,17 @@ def share_chains(session, chain_ids, account_ids):
                     text=message.text,
                     content_path=message.content_path,
                     delay_seconds=message.delay_seconds,
-                    chain_id=chain_copy.id
+                    chain_id=chain_copy.id,
+                    ttl=message.ttl,
+                    latitude=message.latitude,
+                    longitude=message.longitude
                 ))
+    session.commit()
+
+
+def delete_derived(session, chain_ids, account_ids):
+    for chain_id in chain_ids:
+        for account_id in account_ids:
+            [session.delete(obj) for obj in session.query(Chain).filter(Chain.derived_from == chain_id).filter(
+                Chain.account_id == account_id).all()]
     session.commit()

@@ -47,13 +47,16 @@
         {%for message in messages%}
         <div class="message">
             <div>
-                <input autocomplete="off" type="text" id="{{message.id}}:text" name="{{message.id}}:text" placeholder="Текст" title="Текст сообщения"
-                       value="{{message.text}}">
-                <input autocomplete="off" type="text" id="{{message.id}}:content_path" name="{{message.id}}:content_path" title="Путь к содержимому"
-                       placeholder="Путь к содержимому" value="{{message.content_path}}">
+                <input class="long" autocomplete="off" type="text" id="{{message.id}}:text" step="any" name="{{message.id}}:text" placeholder="Текст" title="Текст сообщения"
+                       {% if message.type != 7%} value="{{message.text}}" {% else %} value="{{message.latitude}}" {% endif%}>
+                <input class="long" autocomplete="off" type="text" id="{{message.id}}:content_path" step="any" name="{{message.id}}:content_path" title="Путь к содержимому"
+                       placeholder="Путь к содержимому"
+                       {% if message.type != 7%} value="{{message.content_path}}" {% else %} value="{{message.longitude}}" {% endif%}>
                 <input autocomplete="off" type="number" id="{{message.id}}:delay_seconds" name="{{message.id}}:delay_seconds" title="Задержка перед отправкой"
-                       placeholder="Задержка перед отправкой" value="{{message.delay_seconds}}">
-                <select name="{{message.id}}:type">
+                       placeholder="Задержка перед отправкой" value="{{message.delay_seconds}}" min="0">
+                <input autocomplete="off" type="number" id="{{message.id}}:ttl" name="{{message.id}}:ttl" title="Время жизни"
+                       placeholder="Время жизни" value="{{message.ttl}}" min="0" max="60">
+                <select name="{{message.id}}:type" class="type_changer" onchange="change(this)">
                     <option value="0" {%if message.type== 0%} selected {%endif%}>Текст</option>
                     <option value="1" {%if message.type== 1%} selected {%endif%}>Фото</option>
                     <option value="2" {%if message.type== 2%} selected {%endif%}>Голосовое сообщение</option>
@@ -61,6 +64,7 @@
                     <option value="4" {%if message.type== 4%} selected {%endif%}>Документ</option>
                     <option value="5" {%if message.type== 5%} selected {%endif%}>Видео</option>
                     <option value="6" {%if message.type== 6%} selected {%endif%}>Звуковой файл</option>
+                    <option value="7" {%if message.type== 7%} selected {%endif%}>Местоположение</option>
                 </select>
             </div>
             <div class="manage_message">

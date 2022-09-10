@@ -131,7 +131,7 @@ box-sizing:border-box;
 margin-right: 10px;
 }
 
-.message input[type=number]{
+.message input[type=number]:not(.long){
 width: 60px;
 }
 

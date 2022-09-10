@@ -8,6 +8,7 @@ function get_chain(id){
     req.onload = function(){
         $("main").empty();
         $("main").append(req.response);
+        refresh_messages_constraints()
     };
 }
 
@@ -16,13 +17,16 @@ function new_message(button){
     $(".messages").append(
     '<div class="message">'+
     '        <div>'+
-    '           <input type="text" name="NEW:text" placeholder="Текст" title="Текст сообщения"'+
-    '                   value="">'+
-    '           <input type="text"name="NEW:content_path"'+
-    '                   placeholder="Путь к содержимому" value="" title="Путь к содержимому">'+
+    '           <input type="text" step="any" name="NEW:text" placeholder="Текст" title="Текст сообщения"'+
+    '                   value="" class="long">'+
+    '           <input type="text" step="any" name="NEW:content_path"'+
+    '                   placeholder="Путь к содержимому" value="" title="Путь к содержимому" class="long">'+
     '           <input type="number" name="NEW:delay_seconds"'+
-    '                   placeholder="Задержка перед отправкой" value=0 title="Задержка перед отправкой">'+
-    '            <select name="NEW:type">'+
+    '                   placeholder="Задержка перед отправкой" value=0 title="Задержка перед отправкой" min="0">'+
+        '               <input autocomplete="off" type="number" name="NEW:ttl" title="Время жизни"'+
+    '                       placeholder="Время жизни" value=0 min="0" max="60">'+
+    '            <select name="NEW:type" onchange="change(this)">'+
+
     '                <option value="0">Текст</option>'+
     '                <option value="1">Фото</option>'+
     '                <option value="2">Голосовое сообщение</option>'+
@@ -30,6 +34,7 @@ function new_message(button){
     '                <option value="4">Документ</option>'+
     '                <option value="5">Видео</option>'+
     '                <option value="6">Звуковой файл</option>'+
+    '                <option value="7">Местоположение</option>'+
     '            </select>'+
     '        </div>'+
     '        <div>'+

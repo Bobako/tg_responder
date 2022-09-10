@@ -43,11 +43,12 @@ class Chain(db.Model):
     name = db.Column(db.String)
     keywords = db.Column(db.String)
     turned_on = db.Column(db.Boolean)
-    pause_seconds = db.Column(db.Integer)  # время на которое выкл цепочка после использования
+    pause_seconds = db.Column(db.Integer, default=100)  # время на которое выкл цепочка после использования
     used_at = db.Column(db.DateTime)  # последнее использование
     for_group = db.Column(db.Boolean)  # используется ли в группах
     self_ignore = db.Column(db.Boolean)  # игнорировать ли свои сообщ
     in_ignore = db.Column(db.Boolean)  # игнорировать сообщения в процессе работы цепочки
+    derived_from = db.Column(db.Integer)  # айди шаблона, из которого была расшарена цепочка
 
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'))
     # если None, цепочка не прикреплена к пользователю и является шаблоном
@@ -71,6 +72,9 @@ class Message(db.Model):
     text = db.Column(db.String)
     content_path = db.Column(db.String)
     delay_seconds = db.Column(db.Integer)
+    ttl = db.Column(db.Integer)  # message lifetime duration
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
 
     chain_id = db.Column(db.Integer, db.ForeignKey("chain.id"))
     chain = db.relationship("Chain", back_populates="messages")
