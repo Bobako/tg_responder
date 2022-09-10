@@ -19,9 +19,11 @@ function auth() {
     let req = new XMLHttpRequest();
     req.open("GET",
         "api/auth?phone=" + phone + "&code=" + code + "&password=" + password + "&group_number=" + group_number,
-        false);
+        true);
     req.send(null);
-    req.onload = function(){$("#status").empty();
-    $("#status").append(req.responseText);}
+    req.onload = function(){
+        $("#status").empty();
+        $("#status").append(req.responseText);
+    }
 
 }

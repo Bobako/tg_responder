@@ -1,0 +1,88 @@
+main {
+    padding: 10px;
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    box-sizing: border-box;
+}
+
+.group {
+    margin-top:10px;
+    width: 22%;
+    min-height: 800px;
+    background-color:#CDCDD2;
+    padding:5px;
+    box-sizing:border-box;
+    border-radius:5px;
+    box-shadow: 0 0 1px 1px grey;
+}
+
+.account {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+    background-color: #FFFFFF;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    box-shadow: 1px 1px 0 grey;
+    font-size: 14px;
+}
+
+.indicator {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 7.5px;
+    margin: 5px;
+    background-color: grey;
+}
+
+.status-1{
+    background-color: red;
+}
+.status1{
+    background-color: green;
+}
+
+.account_repr {
+    margin-left: 5px;
+    text-decoration: none;
+    color:black;
+}
+
+.account_manage {
+    float: right;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.end{
+    justify-content:end;
+}
+
+.main_h{
+position:absolute;
+left: 20px;
+}
+
+.add_account{
+    justify-content: center;
+    opacity: 0.8;
+    transition: 0.1s;
+    text-decoration: none;
+    cursor:pointer;
+}
+
+.add_account:hover{
+    color: black;
+    opacity: 1;
+}
+
+.gg-controller{
+    margin:10px;
+    margin-right:15px;
+    cursor:pointer;
+}
