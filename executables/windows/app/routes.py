@@ -1,6 +1,4 @@
 import asyncio
-import copy
-from threading import Lock
 
 from flask import render_template, request
 
@@ -10,8 +8,6 @@ from app.models import Account, Chain, Message
 from app.bot import request_code, auth, add_sessions, add_worker, kill_worker, stop_worker
 from app import forms_handler, database_shortcuts
 from app import loop
-
-lock = Lock()
 
 
 @flask_app.route("/")
@@ -57,7 +53,6 @@ def chains():
             chain_id = chain_dict.pop("id")
             chain_obj = db.session.query(Chain).filter(Chain.id == chain_id).one()
             chain_obj.update(**chain_dict)
-            print(form)
             for i, message in enumerate(form.values()):
                 message["chain_id"] = chain_id
                 message["number"] = i
@@ -135,13 +130,11 @@ def api_toggle():
     class_ = globals()[class_.capitalize()]
     objs = [db.session.query(class_).filter(class_.id == id_).one() for id_ in ids]
     state = not sum(map(int, [obj.turned_on for obj in objs]))
-    with lock:
-        for obj in objs:
-
-            obj.turned_on = state
-            if class_ == Account and not state:
-                asyncio.run_coroutine_threadsafe(stop_worker(obj.id), loop)
-            db.session.commit()
+    for obj in objs:
+        obj.turned_on = state
+        if class_ == Account and not state:
+            asyncio.run_coroutine_threadsafe(stop_worker(obj.id), loop)
+        db.session.commit()
     return ""
 
 
@@ -165,27 +158,24 @@ def api_delete():
     return ""
 
 
-@flask_app.route("/api/move_account")
+@flask_app.route("/api/move_account", methods=["post"])
 def api_move_account():
-    number = int(request.args.get("number"))
-    group = int(request.args.get("group"))
-    id_ = int(request.args.get("id"))
-    account = db.session.query(Account).filter(Account.id == id_).one()
-    old_number = account.number
-    old_group = account.group_number
-    account.group_number = group
-    account.number = number
-    # fixing shifted accounts numbers
-    for account in db.session.query(Account).filter(Account.group_number == old_group).filter(
-            Account.number > old_number).filter(Account.id != id_).all():
-        account.number -= 1
-    for account in db.session.query(Account).filter(Account.group_number == group).filter(
-            Account.number >= number).filter(Account.id != id_).all():
-        account.number += 1
-
+    form = request.form
+    form = forms_handler.parse_forms(form)
+    number = 0
+    group_number = 0
+    for account_id, account_group_number in form.items():
+        account_group_number = account_group_number["group_number"]
+        if account_group_number != group_number:
+            number = 0
+            group_number = account_group_number
+        account = db.session.query(Account).filter(Account.id == account_id).one()
+        account.number = number
+        account.group_number = group_number
+        number += 1
     db.session.commit()
-    return ""
 
+    return "ok"
 
 @flask_app.route("/api/new_chain")
 def api_new_chain():
@@ -205,13 +195,9 @@ def api_new_chain():
 
 @flask_app.route("/api/get_accounts_to_share")
 def api_get_accounts():
-    account_id = request.args.get("account_id", None)
     cids = request.args.get("cids", "")
     action = request.args.get("action", "share")
-    query = db.session.query(Account)
-    if account_id:
-        query = query.filter(Account.id != account_id)
-    accounts = query.all()
+    accounts = db.session.query(Account).all()
     return render_template("sharePopUp.html", accounts=accounts, cids=cids, action=action)
 
 

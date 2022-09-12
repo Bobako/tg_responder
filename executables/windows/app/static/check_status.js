@@ -1,7 +1,6 @@
 $(document).ready(function(){
     sendRequest();
     setInterval(sendRequest, 500);
-
 });
 
 function sendRequest(){

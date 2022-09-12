@@ -10,9 +10,6 @@ from telethon import functions, types
 from app.config import config
 from app.models import Account, Chain, Message, ChainUsage
 from app import db
-from threading import Lock
-
-lock = Lock()
 
 
 async def request_code(phone):
@@ -199,21 +196,16 @@ class Worker:
             await asyncio.sleep(1)
 
     async def run_chain(self, chain, group, tg_message, sent_from, user_entity):
-        print(sent_from)
         if group != chain.for_group:
             return
-
         if tg_message.to_dict()['out'] and chain.self_ignore:
             return
-
         if self.get_chain_status(sent_from)["active"] and chain.in_ignore:
             return
-
         if last_usage := db.session.query(ChainUsage).filter(ChainUsage.chain_id == chain.id).filter(
                 ChainUsage.chat_id == sent_from).first():
             if last_usage.usage_datetime + datetime.timedelta(seconds=chain.pause_seconds) > datetime.datetime.now():
                 return
-
         if not last_usage:
             last_usage = ChainUsage(chain.id, sent_from)
             db.session.add(last_usage)

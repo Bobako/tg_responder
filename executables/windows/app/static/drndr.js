@@ -1,9 +1,13 @@
+$(document).ready(function(){
+updateNumbers();
+})
+
+
 function drag(e, dragger){
   if (e.button!=0){
   return
   }
   let ball = dragger.parentNode.parentNode;
-  console.log(ball)
   let old_group = $(ball.parentElement);
   let old_number = $(ball).attr("number");
   ball.style.width = ball.offsetWidth +"px";
@@ -46,19 +50,16 @@ function drag(e, dragger){
                 }
                 new_number ++;
             }}
-        let req = new XMLHttpRequest();
-        req.open("GET", "api/move_account?group="+new_group.id.slice(5)+"&number="+new_number+"&id="+ball.id.slice(7), true);
-        req.send();
 
-        move_account(new_group, new_number, ball);
+        move_account(new_group, new_number, ball, true);
         return;
     }
-    move_account(old_group, old_number, ball);
+    move_account(old_group, old_number, ball, false);
   }
 
 }
 
-function move_account(group, number, account){
+function move_account(group, number, account, position_changed){
     account.style.position = 'static';
     account = $("body>.account");
     if (number != 0){
@@ -66,11 +67,15 @@ function move_account(group, number, account){
         account.insertAfter(af);
     }
     else{
-    $(account).prependTo(group);
+        $(account).prependTo(group);
+    }
+    if (position_changed){
+        account.find("input").val(group.id.slice(5))
+        updateNumbers();
+        }
     }
 
 
-}
 
 
 function getCoords(elem) {   // кроме IE8-
@@ -79,4 +84,16 @@ function getCoords(elem) {   // кроме IE8-
     top: box.top + pageYOffset,
     left: box.left + pageXOffset
   };
+}
+
+function updateNumbers(){
+$.ajax({
+           type: "POST",
+           url: "/api/move_account",
+           data: $("#account_number_form").serialize(), // serializes the form's elements.
+           success: function(data)
+           {
+               console.log(data); // show response from the php script.
+           }
+         });
 }
