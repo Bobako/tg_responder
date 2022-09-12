@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import datetime
 import os
 import re
@@ -83,11 +84,11 @@ async def add_sessions(group_number, loop):
 
 
 WORKERS = {}
+CHAIN_STATUSES = {}
 
 
 class Worker:
     keep_alive = True
-    chain_statuses = {}
 
     def __init__(self, account_id):
         self.account = db.session.query(Account).filter(Account.id == account_id).one()
@@ -143,10 +144,9 @@ class Worker:
                     file.write(f"{datetime.datetime.now()}: {self.account} - Telegram internal error\n")
                 return
 
-            if self.get_chain_status(sent_from)["active"]:
-                loop = asyncio.get_running_loop()
-                loop.create_task(self.mark_as_read_when_read(event.message, sent_from, user_entity))
-
+            statuses = self.get_chain_status(sent_from)
+            if statuses["active"]:
+                statuses["last_message"] = event.message
             chains = db.session.query(Chain).filter(Chain.account_id == self.account.id).filter(
                 Chain.turned_on == True).all()
             default = False
@@ -200,7 +200,10 @@ class Worker:
             return
         if tg_message.to_dict()['out'] and chain.self_ignore:
             return
-        if self.get_chain_status(sent_from)["active"] and chain.in_ignore:
+        statuses = self.get_chain_status(sent_from)
+        #print(self.account, statuses, id(statuses), self.client)
+        if statuses["active"] and chain.in_ignore:
+            #print("in ignore")
             return
         if last_usage := db.session.query(ChainUsage).filter(ChainUsage.chain_id == chain.id).filter(
                 ChainUsage.chat_id == sent_from).first():
@@ -220,7 +223,9 @@ class Worker:
             await asyncio.sleep(message.delay_seconds)
             await self.client.send_read_acknowledge(user_entity, tg_message)
 
-            self.get_chain_status(sent_from)["responded"] = True
+            if message_to_respond := self.get_chain_status(sent_from)["last_message"]:
+                await self.client.send_read_acknowledge(user_entity, message_to_respond)
+                self.get_chain_status(sent_from)["last_message"] = None
 
             action = ["typing", "photo", "record-audio", "record-round", "document", "video", "audio", "location"][
                 message.type]
@@ -278,21 +283,11 @@ class Worker:
             db.session.commit()
 
     def get_chain_status(self, to_user_id):
-        default_status = {"active": False, "responded": False}
-        if to_user_id not in self.chain_statuses:
-            self.chain_statuses[to_user_id] = default_status
-        return self.chain_statuses[to_user_id]
-
-    async def mark_as_read_when_read(self, tg_message, sent_from, user_entity):
-        status = self.get_chain_status(sent_from)
-        status["responded"] = False
-        while self.keep_alive:
-            if not status["active"]:
-                break
-            if status["responded"]:
-                break
-            await asyncio.sleep(0.3)
-        await self.client.send_read_acknowledge(user_entity, tg_message)
+        key = f"{self.account.id}:{to_user_id}"
+        default_status = {"active": False, "responded": False, "last_message": None}
+        if key not in CHAIN_STATUSES:
+            CHAIN_STATUSES[key] = copy.copy(default_status)
+        return CHAIN_STATUSES[key]
 
 
 def init_workers(loop):  # on app init start in other thread
