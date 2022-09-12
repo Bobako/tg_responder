@@ -13,7 +13,7 @@ from app import loop
 @flask_app.route("/")
 def index():
     groups = []
-    for i in range(4):
+    for i in range(12):
         if group := db.session.query(Account).filter(
                 Account.group_number == i).order_by(Account.number.asc()).all():
             groups.append(group)
