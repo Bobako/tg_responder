@@ -89,7 +89,7 @@ class Message(db.Model):
 
 class ChainUsage(db.Model):
     chain_id = db.Column(db.Integer, primary_key=True)
-    chat_id = db.Column(db.Integer)
+    chat_id = db.Column(db.Integer, primary_key=True)
     usage_datetime = db.Column(db.DateTime)
 
     def __init__(self, chain_id, chat_id):

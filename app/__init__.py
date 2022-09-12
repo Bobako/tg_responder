@@ -15,7 +15,8 @@ flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(flask_app)
 loop = asyncio.get_event_loop()
 
-
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 from app import models
 
