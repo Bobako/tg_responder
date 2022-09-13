@@ -42,7 +42,7 @@
                        ondragstart="return false"
                        class="account_repr">{{account.user_repr}}</a>
                     <div class="account_manage">
-                        <button class="indicator" title="{{status_titles[account.status]}}"
+                        <button type="button" class="indicator" title="{{status_titles[account.status]}}"
                                 onclick="toggle({{account.id}}, 'account')"></button>
                         <input autocomplete="off" type="checkbox" class="ma select_all" id="cb{{account.id}}"
                                onclick="multi_actions()">

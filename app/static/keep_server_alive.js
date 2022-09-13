@@ -8,6 +8,5 @@ function keep_alive(){
     //req.overrideMimeType("application/json");
     req.send();
     req.onload = function(){
-        console.log(req.response)
     };
 }

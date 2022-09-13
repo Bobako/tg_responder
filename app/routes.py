@@ -2,7 +2,7 @@ import asyncio
 
 from flask import render_template, request
 
-from app import flask_app
+from app import flask_app, config
 from app import db
 from app.models import Account, Chain, Message
 from app.bot import request_code, auth, add_sessions, add_worker, kill_worker, stop_worker
@@ -177,6 +177,7 @@ def api_move_account():
 
     return "ok"
 
+
 @flask_app.route("/api/new_chain")
 def api_new_chain():
     account_id = request.args.get("account_id")
@@ -206,3 +207,13 @@ def api_add_session_files():
     group_number = request.args.get("group_number")
     response = asyncio.run(add_sessions(group_number, loop))
     return response
+
+
+def link_keep_alive_placeholder():
+    @flask_app.route("/flaskwebgui-keep-server-alive")
+    def keep_alive_placeholder():
+        return "ok *keep alive placeholder*"
+
+
+if not bool(int(config["FLASK"]["app"])):
+    link_keep_alive_placeholder()
