@@ -56,6 +56,7 @@ class Chain(db.Model):
 
     messages = db.relationship("Message", back_populates="chain", cascade="all, delete")
 
+    usages = db.relationship("ChainUsage", back_populates="chain", cascade="all, delete")
     def __init__(self, **kwargs):
         self.update(**kwargs)
 
@@ -80,6 +81,10 @@ class Message(db.Model):
     chain = db.relationship("Chain", back_populates="messages")
 
     def __init__(self, **kwargs):
+        self.text = ""
+        self.content_path = ""
+        self.delay_seconds = 0
+        self.ttl = 0
         self.update(**kwargs)
 
     def update(self, **kwargs):
@@ -88,9 +93,10 @@ class Message(db.Model):
 
 
 class ChainUsage(db.Model):
-    chain_id = db.Column(db.Integer, primary_key=True)
+    chain_id = db.Column(db.Integer, db.ForeignKey("chain.id"), primary_key=True)
     chat_id = db.Column(db.Integer, primary_key=True)
     usage_datetime = db.Column(db.DateTime)
+    chain = db.relationship("Chain", back_populates="usages")
 
     def __init__(self, chain_id, chat_id):
         self.chat_id = chat_id

@@ -14,18 +14,19 @@ function get_chain(id){
 
 function new_message(button){
     $(button).remove();
+    let number = $(".messages").find('.message').length;
     $(".messages").append(
     '<div class="message">'+
     '        <div>'+
-    '           <input type="text" step="any" name="NEW:text" placeholder="Текст" title="Текст сообщения"'+
+    '           <input type="text" step="any" name="NEW'+number+':text" placeholder="Текст" title="Текст сообщения"'+
     '                   value="" class="long">'+
-    '           <input type="text" step="any" name="NEW:content_path"'+
+    '           <input type="text" step="any" name="NEW'+number+':content_path"'+
     '                   placeholder="Путь к содержимому" value="" title="Путь к содержимому" class="long">'+
-    '           <input type="number" name="NEW:delay_seconds"'+
+    '           <input type="number" name="NEW'+number+':delay_seconds"'+
     '                   placeholder="Задержка перед отправкой" value=0 title="Задержка перед отправкой" min="0">'+
-        '               <input autocomplete="off" type="number" name="NEW:ttl" title="Время жизни"'+
+        '               <input autocomplete="off" type="number" name="NEW'+number+':ttl" title="Время жизни"'+
     '                       placeholder="Время жизни" value=0 min="0" max="60">'+
-    '            <select name="NEW:type" onchange="change(this)">'+
+    '            <select name="NEW'+number+':type" onchange="change(this)">'+
 
     '                <option value="0">Текст</option>'+
     '                <option value="1">Фото</option>'+
