@@ -5,6 +5,7 @@ main {
     overflow-x:scroll;
     align-items:stretch;
     min-height:90%;
+    display:flex;
 }
 
 #account_number_form{
@@ -24,6 +25,7 @@ height:100%;
 .group_container{
     padding:10px;
     margin:auto;
+    margin-top:0;
     min-width:280px;
     max-width: 320px;
     height: 100%;
