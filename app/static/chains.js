@@ -90,7 +90,7 @@ function drag(e, dragger){
         let accounts = messages.childNodes;
         for (let i =0; i < accounts.length; i ++){
             if (accounts[i].className == "message"){
-                if (getCoords(accounts[i]).top > event.clientY){
+                if (getCoords(accounts[i]).top > event.pageY){
                     break;
                 }
                 new_number ++;

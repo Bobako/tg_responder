@@ -45,7 +45,7 @@ function drag(e, dragger){
         let accounts = new_group.childNodes;
         for (let i =0; i < accounts.length; i ++){
             if (accounts[i].className == "account"){
-                if (getCoords(accounts[i]).top > event.clientY){
+                if (getCoords(accounts[i]).top > event.pageY){
                     break;
                 }
                 new_number ++;

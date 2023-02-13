@@ -85,6 +85,7 @@ async def add_sessions(group_number, loop):
 
 WORKERS = {}
 CHAIN_STATUSES = {}
+PENDING_USAGES = {}
 
 
 class Worker:
@@ -173,6 +174,7 @@ class Worker:
                             if was_actually_send:
                                 return
             except Exception as ex:
+                remove_unfinished_chain_traces(self.account.id)
                 with open(config["TELETHON"]["logs"], "a") as file:
                     file.write(f"{datetime.datetime.now()}: {self.client} - {ex} во время работы\n")
 
@@ -201,10 +203,12 @@ class Worker:
         if tg_message.to_dict()['out'] and chain.self_ignore:
             return
         statuses = self.get_chain_status(sent_from)
-        #print(self.account, statuses, id(statuses), self.client)
-        if statuses["active"] and chain.in_ignore:
-            #print("in ignore")
-            return
+
+        if statuses["active"]:
+            for active_chain in statuses["active"]:
+                if active_chain.in_ignore:
+                    return
+
         if last_usage := db.session.query(ChainUsage).filter(ChainUsage.chain_id == chain.id).filter(
                 ChainUsage.chat_id == sent_from).first():
             if last_usage.usage_datetime + datetime.timedelta(seconds=chain.pause_seconds) > datetime.datetime.now():
@@ -214,10 +218,13 @@ class Worker:
             db.session.add(last_usage)
         else:
             last_usage.update()
+
+        if self.account.id not in PENDING_USAGES:
+            PENDING_USAGES[self.account.id] = []
+        PENDING_USAGES[self.account.id].append([chain.id, sent_from])
+
         db.session.commit()
-
-        self.get_chain_status(sent_from)["active"] = True
-
+        self.get_chain_status(sent_from)["active"].append(chain)
         messages = db.session.query(Message).filter(Message.chain_id == chain.id).order_by(Message.number.asc()).all()
         for message in messages:
             await asyncio.sleep(message.delay_seconds)
@@ -251,7 +258,9 @@ class Worker:
                             message=''
                         ))
 
-        self.get_chain_status(sent_from)["active"] = False
+        statuses = self.get_chain_status(sent_from)
+        statuses["active"].pop(statuses["active"].index(chain))
+        PENDING_USAGES[self.account.id].pop(PENDING_USAGES[self.account.id].index([chain.id, sent_from]))
         return True
 
     async def connect(self):
@@ -283,11 +292,12 @@ class Worker:
             db.session.commit()
 
     def get_chain_status(self, to_user_id):
-        key = f"{self.account.id}:{to_user_id}"
-        default_status = {"active": False, "responded": False, "last_message": None}
-        if key not in CHAIN_STATUSES:
-            CHAIN_STATUSES[key] = copy.copy(default_status)
-        return CHAIN_STATUSES[key]
+        if self.account.id not in CHAIN_STATUSES:
+            CHAIN_STATUSES[self.account.id] = {}
+        default_status = {"active": [], "responded": False, "last_message": None}
+        if to_user_id not in CHAIN_STATUSES[self.account.id]:
+            CHAIN_STATUSES[self.account.id][to_user_id] = copy.deepcopy(default_status)
+        return CHAIN_STATUSES[self.account.id][to_user_id]
 
 
 def init_workers(loop):  # on app init start in other thread
@@ -315,13 +325,27 @@ def add_worker(account_id, loop):  # while app running -> in routes
 
 
 async def kill_worker(account_id):  # to delete
+    remove_unfinished_chain_traces(account_id)
     WORKERS[account_id].keep_alive = False
     await WORKERS[account_id].client.disconnect()
     WORKERS.pop(account_id)
 
 
 async def stop_worker(account_id):
+    remove_unfinished_chain_traces(account_id)
     await WORKERS[account_id].client.disconnect()
+
+
+def remove_unfinished_chain_traces(account_id):
+    pending_usages = PENDING_USAGES[account_id]
+    for pending_usage in pending_usages:
+        chain_id, sent_from = pending_usage
+        last_usage = db.session.query(ChainUsage).filter(ChainUsage.chain_id == chain_id).filter(
+            ChainUsage.chat_id == sent_from).first()
+        db.session.delete(last_usage)
+    db.session.commit()
+    for chain in CHAIN_STATUSES[account_id].values():
+        chain["active"] = []
 
 
 def is_similar(s1, s2):
