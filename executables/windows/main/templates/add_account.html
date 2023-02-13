@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'base.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'add_account_styles.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename = 'arrow.css')}}">
+    <script src="{{url_for('static',filename = 'jquery.js')}}"></script>
+    <script src="{{url_for('static',filename = 'keep_server_alive.js')}}"></script>
+    <script src="{{url_for('static',filename = 'new_account.js')}}"></script>
+    <script src="{{url_for('static',filename = 'add_all.js')}}"></script>
+    <title>Teleresponder 2.0</title>
+</head>
+<body>
+<header>
+    <a class="gg-arrow-left" href="{{url_for('index')}}"></a>
+    <h3>Добавить аккаунт</h3>
+</header>
+
+<main>
+    <input style="display: none" type="text" name="fakeusernameremembered"/>
+    <input style="display: none" type="password" name="fakepasswordremembered"/>
+    <label for="phone">Телефон</label>
+    <input autocomplete="off" class="field" type="text" id="phone" placeholder="89123456789">
+    <button class="field" onclick="request_code()">Получить код</button>
+    <label for="code">Код</label>
+    <input autocomplete="off" class="field" type="password" id="code">
+    <label for="password">Пароль</label>
+    <input autocomplete="off" class="field" type="password" id="password">
+    <button class="field" onclick="auth()">Добавить аккаунт</button>
+    <label id="status"></label>
+    <button class="field add_all" onclick="add_all()">Добавить все аккаунты из директории ./sessions</button>
+</main>
+</body>
+</html>

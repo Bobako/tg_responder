@@ -141,7 +141,7 @@ class Worker:
                     break
 
             if not user_entity:
-                with open(config["TELETHON"]["logs"], "a") as file:
+                with open(config["TELETHON"]["logs"], "a", errors="ignore") as file:
                     file.write(f"{datetime.datetime.now()}: {self.account} - Telegram internal error\n")
                 return
 
@@ -175,7 +175,7 @@ class Worker:
                                 return
             except Exception as ex:
                 remove_unfinished_chain_traces(self.account.id)
-                with open(config["TELETHON"]["logs"], "a") as file:
+                with open(config["TELETHON"]["logs"], "a", errors="ignore") as file:
                     file.write(f"{datetime.datetime.now()}: {self.client} - {ex} во время работы\n")
 
     async def run(self):
@@ -186,7 +186,7 @@ class Worker:
                     try:
                         await self.client.run_until_disconnected()
                     except Exception as ex:
-                        with open(config["TELETHON"]["logs"], "a") as file:
+                        with open(config["TELETHON"]["logs"], "a", errors="ignore") as file:
                             file.write(f"{datetime.datetime.now()}: {self.client} - {ex} во время работы\n")
 
                 else:
@@ -269,7 +269,7 @@ class Worker:
                 await self.client.connect()
             await self.client.sign_in()
         except Exception as ex:
-            with open(config["TELETHON"]["logs"], "a") as file:
+            with open(config["TELETHON"]["logs"], "a", errors="ignore") as file:
                 file.write(f"{datetime.datetime.now()}: {ex} при попытке запуска/перезапуска {self.account}\n")
             self.account.status = -1
             db.session.commit()
