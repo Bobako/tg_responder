@@ -16,7 +16,7 @@ def index():
     for i in range(12):
         if group := db.session.query(Account).filter(
                 Account.group_number == i).order_by(Account.number.asc()).all():
-            groups.append(group*100)
+            groups.append(group)
     if not groups:
         groups = [[]]
     return render_template("index_page.html", groups=groups, add_button=len(groups) != 4,
