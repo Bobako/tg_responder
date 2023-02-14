@@ -205,9 +205,8 @@ class Worker:
         statuses = self.get_chain_status(sent_from)
 
         if statuses["active"]:
-            for active_chain in statuses["active"]:
-                if active_chain.in_ignore:
-                    return
+            if chain.in_ignore:
+                return
 
         if last_usage := db.session.query(ChainUsage).filter(ChainUsage.chain_id == chain.id).filter(
                 ChainUsage.chat_id == sent_from).first():
