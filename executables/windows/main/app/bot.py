@@ -92,6 +92,8 @@ class Worker:
     keep_alive = True
 
     def __init__(self, account_id):
+        PENDING_USAGES[account_id] = []
+        CHAIN_STATUSES[account_id] = {}
         self.account = db.session.query(Account).filter(Account.id == account_id).one()
         self.session = db.session
         self.account.status = 0
@@ -205,9 +207,8 @@ class Worker:
         statuses = self.get_chain_status(sent_from)
 
         if statuses["active"]:
-            for active_chain in statuses["active"]:
-                if active_chain.in_ignore:
-                    return
+            if chain.in_ignore:
+                return
 
         if last_usage := db.session.query(ChainUsage).filter(ChainUsage.chain_id == chain.id).filter(
                 ChainUsage.chat_id == sent_from).first():
@@ -219,8 +220,6 @@ class Worker:
         else:
             last_usage.update()
 
-        if self.account.id not in PENDING_USAGES:
-            PENDING_USAGES[self.account.id] = []
         PENDING_USAGES[self.account.id].append([chain.id, sent_from])
 
         db.session.commit()
@@ -338,7 +337,8 @@ async def stop_worker(account_id):
 
 def remove_unfinished_chain_traces(account_id):
     pending_usages = PENDING_USAGES[account_id]
-    for pending_usage in pending_usages:
+    while pending_usages:
+        pending_usage = pending_usages.pop(0)
         chain_id, sent_from = pending_usage
         last_usage = db.session.query(ChainUsage).filter(ChainUsage.chain_id == chain_id).filter(
             ChainUsage.chat_id == sent_from).first()
