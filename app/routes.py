@@ -19,7 +19,7 @@ def index():
             groups.append(group)
     if not groups:
         groups = [[]]
-    return render_template("index_page.html", groups=groups, add_button=len(groups) != 4,
+    return render_template("index_page.html", groups=groups, add_button=len(groups) <12,
                            status_titles={-1: "Не удалось подключиться", 0: "Отключен", 1: "Активен"})
 
 
