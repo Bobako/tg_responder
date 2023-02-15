@@ -21,7 +21,7 @@ function new_message(button){
     '           <input type="text" step="any" name="NEW'+number+':text" placeholder="Текст" title="Текст сообщения"'+
     '                   value="" class="long">'+
     '           <input type="text" step="any" name="NEW'+number+':content_path"'+
-    '                   placeholder="Путь к содержимому" value="" title="Путь к содержимому" class="long">'+
+    '                   disabled placeholder="Путь к содержимому" value="" title="Путь к содержимому" class="long">'+
     '           <input type="number" name="NEW'+number+':delay_seconds"'+
     '                   placeholder="Задержка перед отправкой" value=0 title="Задержка перед отправкой" min="0">'+
         '               <input autocomplete="off" type="number" name="NEW'+number+':ttl" title="Время жизни"'+

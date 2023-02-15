@@ -319,10 +319,12 @@ async def prevent_loop_stop(loop):
 
 
 async def update_worker_status(worker: Worker):
-    if (await worker.client.get_me()):
-        status = 1
-    else:
-        status = -1
+    status = -1
+    try:
+        if (await worker.client.get_me()):
+            status = 1
+    except Exception:
+        pass
     worker.set_status(status)
 
 
