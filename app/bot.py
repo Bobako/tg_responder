@@ -306,13 +306,24 @@ def init_workers(loop):  # on app init start in other thread
         worker = Worker(account.id)
         WORKERS[account.id] = worker
         loop.create_task(worker.run())
-    loop.create_task(prevent_loop_stop())
+    loop.create_task(prevent_loop_stop(loop))
     loop.run_forever()
 
 
-async def prevent_loop_stop():
+async def prevent_loop_stop(loop):
     while True:
-        await asyncio.sleep(60)
+        await asyncio.sleep(10)
+        for worker in WORKERS.values():
+            if worker.account.turned_on:
+                loop.create_task(update_worker_status(worker))
+
+
+async def update_worker_status(worker: Worker):
+    if (await worker.client.get_me()):
+        status = 1
+    else:
+        status = -1
+    worker.set_status(status)
 
 
 def add_worker(account_id, loop):  # while app running -> in routes
