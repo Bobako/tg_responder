@@ -43,13 +43,13 @@ function change(selector, changed=true){
         $(path).prop("disabled", true)
         $(ttl).prop("disabled", true)
         place_dummy(path, "path_dummy", fields_container, true)
-        place_dummy(ttl, "ttl_dummy", fields_container, true)
+        place_dummy(ttl, "ttl_dummy", fields_container, true, 0)
     }
     else{
         $(path).prop("disabled", false)
         $(ttl).prop("disabled", false)
         place_dummy(path, "path_dummy", fields_container, false)
-        place_dummy(ttl, "ttl_dummy", fields_container, false)
+        place_dummy(ttl, "ttl_dummy", fields_container, false, 0)
     }
 
     if (changed){
@@ -60,12 +60,12 @@ function change(selector, changed=true){
 
 }
 
-function place_dummy(field, dummy_class, fields_container, place){
+function place_dummy(field, dummy_class, fields_container, place, val=null){
         if (place){
         var dummy = $(field).clone()
 
         $(dummy).prop("disabled", false)
-        $(dummy).val(null)
+        $(dummy).val(val)
         $(dummy).prop("hidden", true)
         $(dummy).addClass(dummy_class)
         $(fields_container).append(dummy)}
