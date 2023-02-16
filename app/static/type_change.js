@@ -6,30 +6,6 @@ function change(selector, changed=true){
     const path = (fields_container.find("input")[1]);
     const ttl =  (fields_container.find("input")[3]);
     const id = ttl.name.slice(0, -4)
-    console.log(id);
-    if (type == 2 || type == 3){
-        $(text).prop("disabled", true)
-        place_dummy(text, "text_dummy", fields_container, true)
-
-    }
-    else{
-        $(text).prop("disabled", false)
-        place_dummy(text, "text_dummy", fields_container, false)
-    }
-
-    if (type == 0){
-        $(path).prop("disabled", true)
-        $(ttl).prop("disabled", true)
-        place_dummy(path, "path_dummy", fields_container, true)
-        place_dummy(ttl, "ttl_dummy", fields_container, true)
-    }
-    else{
-        $(path).prop("disabled", false)
-        $(ttl).prop("disabled", false)
-        place_dummy(path, "path_dummy", fields_container, false)
-        place_dummy(ttl, "ttl_dummy", fields_container, false)
-    }
-
     if (type == 7){
         $(text).attr("name", id+":latitude")
         $(text).attr("type", "number")
@@ -53,6 +29,29 @@ function change(selector, changed=true){
         $(path).attr("placeholder", "Путь к содержимому")
         $(path).attr("title", "Путь к содержимому")
     }
+    if (type == 2 || type == 3){
+        $(text).prop("disabled", true)
+        place_dummy(text, "text_dummy", fields_container, true)
+
+    }
+    else{
+        $(text).prop("disabled", false)
+        place_dummy(text, "text_dummy", fields_container, false)
+    }
+
+    if (type == 0){
+        $(path).prop("disabled", true)
+        $(ttl).prop("disabled", true)
+        place_dummy(path, "path_dummy", fields_container, true)
+        place_dummy(ttl, "ttl_dummy", fields_container, true)
+    }
+    else{
+        $(path).prop("disabled", false)
+        $(ttl).prop("disabled", false)
+        place_dummy(path, "path_dummy", fields_container, false)
+        place_dummy(ttl, "ttl_dummy", fields_container, false)
+    }
+
     if (changed){
             $(text).val(null)
             $(path).val(null)

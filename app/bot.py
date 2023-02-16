@@ -312,7 +312,7 @@ def init_workers(loop):  # on app init start in other thread
 
 async def prevent_loop_stop(loop):
     while True:
-        await asyncio.sleep(10)
+        await asyncio.sleep(int(config["TELETHON"]["time"]))
         for worker in WORKERS.values():
             if worker.account.turned_on:
                 loop.create_task(update_worker_status(worker))
@@ -325,6 +325,9 @@ async def update_worker_status(worker: Worker):
             status = 1
     except Exception:
         pass
+    if status == -1 and worker.account.status == 1:
+        with open(config["TELETHON"]["logs"], "a", errors="ignore") as file:
+            file.write(f"{datetime.datetime.now()}: {worker.account} был отключен по причине 'выхода с устройства' (так же может быть вызвано потерей связи)\n")
     worker.set_status(status)
 
 
